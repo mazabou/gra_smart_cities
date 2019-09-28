@@ -1,2 +1,5 @@
+data/raw/**
+data/processed/darknet/obj/**
+
 SC2020.pem
 .DS_Store
