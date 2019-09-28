@@ -1,7 +1,7 @@
 # Transfer learning on traffic sign detection using limited data
 
 ### TODO
-- [x] Setup aws EC2 instance
+- [x] Setup an aws EC2 instance
 - [x] Download and prepare the GTSDB dataset 
 - [ ] Train the YOLO network
 
@@ -21,6 +21,22 @@ To use the darknet framework, the dataset needs to be converted to the right for
 sh prepare_gtsdb.sh
 ```
 
-`TODO:` Find the official train/test split to ensure cohernece when comparing different network's validation scores.
+`TODO`: Find the official train/test split to ensure coherence when comparing different network's validation scores.
 
+The data folder structure is as follows
+## Recommended Directory Structure for Training and Evaluation
+
+```
++ data
+  + raw
+    + FullIJCNN2013
+  + processed
+    + darknet
+      + obj
+      + obj.names
+      + obj.data
+      + train.txt
+      + test.txt
+```
 ## Part 2: Training
+`[WIP]`
