@@ -1,3 +1,6 @@
 [submodule "darknet"]
 	path = darknet
 	url = https://github.com/AlexeyAB/darknet
+[submodule "Pelee"]
+	path = Pelee
+	url = https://github.com/Robert-JunWang/Pelee
