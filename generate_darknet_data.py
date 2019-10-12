@@ -1,6 +1,7 @@
 import re
 import argparse
 import os
+import glob
 
 import pandas as pd
 from PIL import Image
@@ -38,6 +39,9 @@ def generate_obj_names():
 def generate_obj_files():
     print('Generating annotation file.')
 
+    # get file list
+    files = glob.glob(os.path.join(args.raw_data_dir, "*.ppm"))
+
     # load csv files containing annotation data
     gt_file = os.path.join(args.raw_data_dir, "gt.txt")
     df = pd.read_csv(gt_file, index_col=0 , sep=';', names=['file', 'xmin', 'ymin', 'xmax', 'ymax', 'class'])
@@ -46,12 +50,13 @@ def generate_obj_files():
     obj_dir = os.path.join(args.darknet_data_dir, "obj")
     os.makedirs(obj_dir, exist_ok=True)
 
-    for idx in tqdm(df.index.unique()):
+    for file in tqdm(files):
         # note that the dataframe index is the filename (multiple rows can have the same index)
         # there can be multiple bounding boxes (defined by a row) for a single image (defined by the index)
 
+        idx = os.path.basename(file)
         # save image in the jpeg format
-        img = Image.open(os.path.join(args.raw_data_dir, idx))
+        img = Image.open(file)
         img_filename = os.path.join(obj_dir, idx[:-4]+'.jpg')
         img.save(img_filename)
 
@@ -59,18 +64,19 @@ def generate_obj_files():
         img_width, img_height = img.size
         
         bounding_boxes = [] 
-        for _, bb in df.loc[[idx]].iterrows():
-            xmin, ymin, xmax, ymax, class_id = bb 
+        if idx in df.index:
+            for _, bb in df.loc[[idx]].iterrows():
+                xmin, ymin, xmax, ymax, class_id = bb 
 
-            # compute the new "darknet" annotations
-            x_center = (xmin + xmax) / 2. / img_width
-            y_center = (ymin + ymax) / 2. / img_height
-            bb_width = (xmax - xmin) / img_width
-            bb_height = (ymax - ymin) / img_height
+                # compute the new "darknet" annotations
+                x_center = (xmin + xmax) / 2. / img_width
+                y_center = (ymin + ymax) / 2. / img_height
+                bb_width = (xmax - xmin) / img_width
+                bb_height = (ymax - ymin) / img_height
 
-            # <object-class> <x_center> <y_center> <width> <height>
-            bb_annotation = ' '.join(map(str, [class_id, x_center, y_center, bb_width, bb_height]))
-            bounding_boxes.append(bb_annotation)
+                # <object-class> <x_center> <y_center> <width> <height>
+                bb_annotation = ' '.join(map(str, [class_id, x_center, y_center, bb_width, bb_height]))
+                bounding_boxes.append(bb_annotation)
 
         # save the sample's annotation file
         with open(annotation_filename, 'w') as f:
