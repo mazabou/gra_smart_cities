@@ -1,5 +1,7 @@
-FILE=data/processed/darknet/obj.names
-rm $FILE && touch $FILE
+FILE=data/processed/darknet/obj.data
+if [ -f "$FILE" ]; then
+  rm $FILE && touch $FILE
+fi
 echo "classes=$1" >> $FILE
 echo "train  = data/train.txt" >> $FILE
 echo "valid  = data/test.txt" >> $FILE
