@@ -14,6 +14,10 @@ parser.add_argument('--raw_data_dir', '-i', type=str, required=True,
                      help='Raw data directory.')
 parser.add_argument('--darknet_data_dir', '-o', type=str, required=True,
                      help='Directory where data will be generated.')
+parser.add_argument('--random_shift_center', type=int, default=0
+                     help='')
+parser.add_argument('--random_shift_size', type=int, default=0
+                     help='')
 
 args = parser.parse_args()
 args.raw_data_dir = os.path.abspath(args.raw_data_dir)
@@ -87,11 +91,15 @@ def generate_obj_files():
             for _, bb in df.loc[[idx]].iterrows():
                 xmin, ymin, xmax, ymax, class_id, category_id = bb 
 
+                # generate random shift
+                x_center_shift, y_center_shift = np.random.randint(low=-args.random_shift_center, high=args.random_shift_center, size=2)
+                bb_width_shift, bb_height_shift = np.random.randint(low=-args.random_shift_size, high=args.random_shift_size, size=2)
+
                 # compute the new "darknet" annotations
-                x_center = (xmin + xmax) / 2. / img_width
-                y_center = (ymin + ymax) / 2. / img_height
-                bb_width = (xmax - xmin) / img_width
-                bb_height = (ymax - ymin) / img_height
+                x_center = (xmin + xmax + 2 * x_center_shift) / 2. / img_width
+                y_center = (ymin + ymax + 2 * y_center_shift) / 2. / img_height
+                bb_width = (xmax - xmin + bb_width_shift) / img_width
+                bb_height = (ymax - ymin + bb_height_shift) / img_height
 
                 # <object-class> <x_center> <y_center> <width> <height>
                 bb_annotation_43 = ' '.join(map(str, [class_id, x_center, y_center, bb_width, bb_height]))
